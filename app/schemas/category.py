@@ -1,9 +1,8 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class CategoryBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100, description="Nombre de la categoría")
+    name: str = Field(..., min_length=1, max_length=255)
 
 
 class CategoryCreate(CategoryBase):
@@ -11,18 +10,10 @@ class CategoryCreate(CategoryBase):
 
 
 class CategoryUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    name: str | None = Field(None, min_length=1, max_length=255)
 
 
-class CategoryResponse(CategoryBase):
+class CategoryRead(CategoryBase):
     id: int
-    
-    class Config:
-        from_attributes = True
 
-
-class CategoryWithProducts(CategoryResponse):
-    products: list = []
-    
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}

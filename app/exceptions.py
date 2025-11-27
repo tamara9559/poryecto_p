@@ -1,30 +1,16 @@
-class InventoryException(Exception):
-    """Excepción base para el sistema de inventario"""
-    pass
+from fastapi import HTTPException, status
 
 
-class ResourceNotFoundException(InventoryException):
-    """Excepción cuando no se encuentra un recurso"""
-    def __init__(self, resource: str, resource_id: int):
-        self.resource = resource
-        self.resource_id = resource_id
-        super().__init__(f"{resource} with id {resource_id} not found")
+class NotFoundException(HTTPException):
+    def __init__(self, detail: str = "Recurso no encontrado"):
+        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
 
-class DuplicateResourceException(InventoryException):
-    """Excepción cuando se intenta crear un recurso duplicado"""
-    def __init__(self, resource: str, field: str, value: str):
-        self.resource = resource
-        self.field = field
-        self.value = value
-        super().__init__(f"{resource} with {field}='{value}' already exists")
+class BadRequestException(HTTPException):
+    def __init__(self, detail: str = "Solicitud incorrecta"):
+        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
 
 
-class InvalidOperationException(InventoryException):
-    """Excepción para operaciones inválidas"""
-    pass
-
-
-class DatabaseException(InventoryException):
-    """Excepción para errores de base de datos"""
-    pass
+class ConflictException(HTTPException):
+    def __init__(self, detail: str = "Conflicto"):
+        super().__init__(status_code=status.HTTP_409_CONFLICT, detail=detail)

@@ -1,24 +1,22 @@
 from pydantic_settings import BaseSettings
-from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    # Database configuration
-    DATABASE_URL: str = "mysql+pymysql://user:password@your-rds-endpoint:3306/p-pruebas"
-    
-    # API configuration
-    API_TITLE: str = "Inventory Management System"
-    API_VERSION: str = "1.0.0"
-    API_PREFIX: str = "/api/v1"
-    
-    # CORS
-    CORS_ORIGINS: list = ["*"]
-    
+    # Datos para la conexión a la base de datos (Amazon RDS MySQL)
+    DB_USER: str
+    DB_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: int = 3306
+    DB_NAME: str
+
+    # Otros
+    APP_NAME: str = "Inventory API"
+    DEBUG: bool = False
+
     class Config:
         env_file = ".env"
-        case_sensitive = True
+        env_file_encoding = "utf-8"
 
 
-@lru_cache()
-def get_settings() -> Settings:
-    return Settings()
+settings = Settings()
+

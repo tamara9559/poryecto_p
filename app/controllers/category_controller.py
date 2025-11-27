@@ -1,59 +1,40 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
-from database import get_db
-from schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
-from services.category_service import CategoryService
-from exceptions import ResourceNotFoundException, DuplicateResourceException, DatabaseException
 
-router = APIRouter(prefix="/categories", tags=["categories"])
+from ..database import get_db
+from ..schemas.category import CategoryCreate, CategoryRead, CategoryUpdate
+from ..services.category_service import CategoryService
 
-
-@router.post("/", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
-def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
-    """Crea una nueva categoría"""
-    try:
-        return CategoryService.create_category(db, category)
-    except DuplicateResourceException as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-    except DatabaseException as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+router = APIRouter()
 
 
-@router.get("/", response_model=List[CategoryResponse])
-def get_categories(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Obtiene todas las categorías"""
-    return CategoryService.get_categories(db, skip, limit)
+@router.post("/", response_model=CategoryRead, status_code=status.HTTP_201_CREATED)
+def create_category(payload: CategoryCreate, db: Session = Depends(get_db)):
+    service = CategoryService(db)
+    return service.create(payload)
 
 
-@router.get("/{category_id}", response_model=CategoryResponse)
+@router.get("/", response_model=List[CategoryRead])
+def list_categories(db: Session = Depends(get_db)):
+    service = CategoryService(db)
+    return service.list_all()
+
+
+@router.get("/{category_id}", response_model=CategoryRead)
 def get_category(category_id: int, db: Session = Depends(get_db)):
-    """Obtiene una categoría por ID"""
-    try:
-        return CategoryService.get_category(db, category_id)
-    except ResourceNotFoundException as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    service = CategoryService(db)
+    return service.get_or_404(category_id)
 
 
-@router.put("/{category_id}", response_model=CategoryResponse)
-def update_category(category_id: int, category: CategoryUpdate, db: Session = Depends(get_db)):
-    """Actualiza una categoría"""
-    try:
-        return CategoryService.update_category(db, category_id, category)
-    except ResourceNotFoundException as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except DuplicateResourceException as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-    except DatabaseException as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+@router.put("/{category_id}", response_model=CategoryRead)
+def update_category(category_id: int, payload: CategoryUpdate, db: Session = Depends(get_db)):
+    service = CategoryService(db)
+    return service.update(category_id, payload)
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_category(category_id: int, db: Session = Depends(get_db)):
-    """Elimina una categoría"""
-    try:
-        CategoryService.delete_category(db, category_id)
-    except ResourceNotFoundException as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except DatabaseException as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    service = CategoryService(db)
+    service.delete(category_id)
+    return None

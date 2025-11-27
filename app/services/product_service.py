@@ -1,104 +1,65 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
-from models.product import Product
-from schemas.product import ProductCreate, ProductUpdate
-from exceptions import ResourceNotFoundException, DatabaseException, InvalidOperationException
+
+from ..models.product import Product
+from ..models.category import Category
+from ..schemas.product import ProductCreate, ProductUpdate
+from ..exceptions import NotFoundException, BadRequestException
 
 
 class ProductService:
-    """Servicio para gestionar productos"""
-    
-    @staticmethod
-    def create_product(db: Session, product_data: ProductCreate) -> Product:
-        """Crea un nuevo producto"""
-        # Verificar que la categoría exista
-        from app.services.category_service import CategoryService
-        CategoryService.get_category(db, product_data.category_id)
-        
-        try:
-            db_product = Product(
-                name=product_data.name,
-                description=product_data.description,
-                price=product_data.price,
-                stock=product_data.stock,
-                category_id=product_data.category_id
-            )
-            db.add(db_product)
-            db.commit()
-            db.refresh(db_product)
-            return db_product
-        except Exception as e:
-            db.rollback()
-            raise DatabaseException(f"Error creating product: {str(e)}")
-    
-    @staticmethod
-    def get_product(db: Session, product_id: int) -> Product:
-        """Obtiene un producto por ID"""
-        product = db.query(Product).filter(Product.id == product_id).first()
-        if not product:
-            raise ResourceNotFoundException("Product", product_id)
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, payload: ProductCreate) -> Product:
+        category = self.db.query(Category).get(payload.category_id)
+        if not category:
+            raise BadRequestException(detail=f"Categoría {payload.category_id} no existe")
+
+        product = Product(
+            name=payload.name,
+            description=payload.description,
+            price=payload.price,
+            stock=payload.stock,
+            category_id=payload.category_id,
+        )
+        self.db.add(product)
+        self.db.commit()
+        self.db.refresh(product)
         return product
-    
-    @staticmethod
-    def get_products(db: Session, skip: int = 0, limit: int = 100, category_id: Optional[int] = None) -> List[Product]:
-        """Obtiene todos los productos con paginación y filtro por categoría"""
-        query = db.query(Product)
-        
-        if category_id is not None:
-            query = query.filter(Product.category_id == category_id)
-        
-        return query.offset(skip).limit(limit).all()
-    
-    @staticmethod
-    def update_product(db: Session, product_id: int, product_data: ProductUpdate) -> Product:
-        """Actualiza un producto existente"""
-        product = ProductService.get_product(db, product_id)
-        
-        # Si se actualiza la categoría, verificar que exista
-        if product_data.category_id is not None:
-            from app.services.category_service import CategoryService
-            CategoryService.get_category(db, product_data.category_id)
-        
-        try:
-            update_data = product_data.model_dump(exclude_unset=True)
-            for field, value in update_data.items():
-                setattr(product, field, value)
-            
-            db.commit()
-            db.refresh(product)
-            return product
-        except Exception as e:
-            db.rollback()
-            raise DatabaseException(f"Error updating product: {str(e)}")
-    
-    @staticmethod
-    def delete_product(db: Session, product_id: int) -> bool:
-        """Elimina un producto"""
-        product = ProductService.get_product(db, product_id)
-        
-        try:
-            db.delete(product)
-            db.commit()
-            return True
-        except Exception as e:
-            db.rollback()
-            raise DatabaseException(f"Error deleting product: {str(e)}")
-    
-    @staticmethod
-    def update_stock(db: Session, product_id: int, quantity: int) -> Product:
-        """Actualiza el stock de un producto"""
-        product = ProductService.get_product(db, product_id)
-        
-        new_stock = product.stock + quantity
-        if new_stock < 0:
-            raise InvalidOperationException("Insufficient stock")
-        
-        try:
-            product.stock = new_stock
-            db.commit()
-            db.refresh(product)
-            return product
-        except Exception as e:
-            db.rollback()
-            raise DatabaseException(f"Error updating stock: {str(e)}")
+
+    def list_all(self, skip: int = 0, limit: int = 100) -> List[Product]:
+        return self.db.query(Product).offset(skip).limit(limit).order_by(Product.id).all()
+
+    def get_or_404(self, product_id: int) -> Product:
+        product = self.db.query(Product).get(product_id)
+        if not product:
+            raise NotFoundException(detail=f"Producto con id {product_id} no encontrado")
+        return product
+
+    def update(self, product_id: int, payload: ProductUpdate) -> Product:
+        product = self.get_or_404(product_id)
+
+        if payload.name is not None:
+            product.name = payload.name
+        if payload.description is not None:
+            product.description = payload.description
+        if payload.price is not None:
+            product.price = payload.price
+        if payload.stock is not None:
+            product.stock = payload.stock
+        if payload.category_id is not None:
+            cat = self.db.query(Category).get(payload.category_id)
+            if not cat:
+                raise BadRequestException(detail=f"Categoría {payload.category_id} no existe")
+            product.category_id = payload.category_id
+
+        self.db.add(product)
+        self.db.commit()
+        self.db.refresh(product)
+        return product
+
+    def delete(self, product_id: int) -> None:
+        product = self.get_or_404(product_id)
+        self.db.delete(product)
+        self.db.commit()
