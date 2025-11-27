@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field, confloat, conint, PositiveFloat, NonNegativeInt
+from pydantic import BaseModel, Field, PositiveFloat, NonNegativeInt
 from typing import Optional
-from category import CategoryRead
+from .category import CategoryRead
 
 
 class ProductBase(BaseModel):
