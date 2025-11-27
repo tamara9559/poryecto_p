@@ -1,0 +1,9 @@
+# Archivos sensibles
+.env
+
+# Archivos Python
+__pycache__/
+*.pyc
+
+
+test_connection.py

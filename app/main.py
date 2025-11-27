@@ -1,25 +1,31 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from .database import engine, Base
 from .config import settings
 
-# Routers
 from .controllers.category_controller import router as category_router
 from .controllers.product_controller import router as product_router
 
 app = FastAPI(title=settings.APP_NAME)
 
+# CORS (necesario para frontend web)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Cambiar cuando tengas dominio fijo
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.on_event("startup")
-def startup():
-    # Crear tablas si no existen (solo para dev / despliegue inicial)
-    Base.metadata.create_all(bind=engine)
-
-
-# Incluir routers
+# Registrar routers
 app.include_router(category_router, prefix="/categories", tags=["categories"])
 app.include_router(product_router, prefix="/products", tags=["products"])
 
-
 @app.get("/")
 def read_root():
-    return {"app": settings.APP_NAME, "message": "API de inventario funcionando"}
+    return {
+        "app": settings.APP_NAME,
+        "message": "API de inventario funcionando correctamente"
+    }
+
