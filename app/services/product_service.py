@@ -29,7 +29,14 @@ class ProductService:
         return product
 
     def list_all(self, skip: int = 0, limit: int = 100) -> List[Product]:
-        return self.db.query(Product).offset(skip).limit(limit).order_by(Product.id).all()
+        return (
+        self.db.query(Product)
+        .order_by(Product.id)        
+        .offset(skip)                
+        .limit(limit)               
+        .all()
+        )
+
 
     def get_or_404(self, product_id: int) -> Product:
         product = self.db.query(Product).get(product_id)

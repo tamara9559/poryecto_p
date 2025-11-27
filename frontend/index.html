@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario - Frontend Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 20px;
+        }
+
+        h2 { margin-top: 40px; }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        input, select {
+            padding: 8px;
+            width: 250px;
+            margin: 5px 0;
+            display: block;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover { background: #45a049; }
+
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Inventario - Frontend Simple</h1>
+    <p>Consumiendo la API en <strong>http://localhost:8000</strong></p>
+
+    <div id="output"></div>
+
+    <!-- ===================== CATEGORÍAS ======================= -->
+    <h2>Categorías</h2>
+
+    <div class="card">
+        <h3>Crear Categoría</h3>
+        <input id="cat_name" type="text" placeholder="Nombre categoría">
+        <button onclick="createCategory()">Crear</button>
+    </div>
+
+    <div class="card">
+        <h3>Listar Categorías</h3>
+        <button onclick="listCategories()">Listar</button>
+    </div>
+
+    <div class="card">
+        <h3>Actualizar Categoría</h3>
+        <input id="cat_id_up" type="number" placeholder="ID">
+        <input id="cat_name_up" type="text" placeholder="Nuevo nombre">
+        <button onclick="updateCategory()">Actualizar</button>
+    </div>
+
+    <div class="card">
+        <h3>Eliminar Categoría</h3>
+        <input id="cat_id_del" type="number" placeholder="ID">
+        <button onclick="deleteCategory()">Eliminar</button>
+    </div>
+
+    <!-- ===================== PRODUCTOS ======================= -->
+    <h2>Productos</h2>
+
+    <div class="card">
+        <h3>Crear Producto</h3>
+        <input id="prod_name" type="text" placeholder="Nombre">
+        <input id="prod_desc" type="text" placeholder="Descripción">
+        <input id="prod_price" type="number" step="0.01" placeholder="Precio">
+        <input id="prod_stock" type="number" placeholder="Stock">
+        <input id="prod_cat" type="number" placeholder="ID Categoría">
+        <button onclick="createProduct()">Crear</button>
+    </div>
+
+    <div class="card">
+        <h3>Listar Productos</h3>
+        <button onclick="listProducts()">Listar</button>
+    </div>
+
+    <div class="card">
+        <h3>Actualizar Producto</h3>
+        <input id="prod_id_up" type="number" placeholder="ID producto">
+        <input id="prod_name_up" type="text" placeholder="Nuevo nombre">
+        <input id="prod_desc_up" type="text" placeholder="Nueva descripción">
+        <input id="prod_price_up" type="number" step="0.01" placeholder="Nuevo precio">
+        <input id="prod_stock_up" type="number" placeholder="Nuevo stock">
+        <input id="prod_cat_up" type="number" placeholder="Nueva categoría">
+        <button onclick="updateProduct()">Actualizar</button>
+    </div>
+
+    <div class="card">
+        <h3>Eliminar Producto</h3>
+        <input id="prod_id_del" type="number" placeholder="ID producto">
+        <button onclick="deleteProduct()">Eliminar</button>
+    </div>
+
+    <h2>Respuesta API</h2>
+    <pre id="api_result">Esperando acciones...</pre>
+
+<script>
+    const API = "http://localhost:8000";
+
+    function show(data) {
+        document.getElementById("api_result").textContent =
+            JSON.stringify(data, null, 2);
+    }
+
+    // ================= CATEGORÍAS =================
+    async function createCategory() {
+        const name = document.getElementById("cat_name").value;
+        const res = await fetch(`${API}/categories/`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ name })
+        });
+        show(await res.json());
+    }
+
+    async function listCategories() {
+        const res = await fetch(`${API}/categories/`);
+        show(await res.json());
+    }
+
+    async function updateCategory() {
+        const id = document.getElementById("cat_id_up").value;
+        const name = document.getElementById("cat_name_up").value;
+
+        const res = await fetch(`${API}/categories/${id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ name })
+        });
+        show(await res.json());
+    }
+
+    async function deleteCategory() {
+        const id = document.getElementById("cat_id_del").value;
+        const res = await fetch(`${API}/categories/${id}`, {
+            method: "DELETE"
+        });
+        show({ status: res.status, message: "Eliminado" });
+    }
+
+    // ================= PRODUCTOS =================
+    async function createProduct() {
+        const payload = {
+            name: document.getElementById("prod_name").value,
+            description: document.getElementById("prod_desc").value,
+            price: parseFloat(document.getElementById("prod_price").value),
+            stock: parseInt(document.getElementById("prod_stock").value),
+            category_id: parseInt(document.getElementById("prod_cat").value),
+        };
+
+        const res = await fetch(`${API}/products/`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        });
+        show(await res.json());
+    }
+
+    async function listProducts() {
+        const res = await fetch(`${API}/products/`);
+        show(await res.json());
+    }
+
+    async function updateProduct() {
+        const id = document.getElementById("prod_id_up").value;
+
+        const payload = {
+            name: document.getElementById("prod_name_up").value || null,
+            description: document.getElementById("prod_desc_up").value || null,
+            price: parseFloat(document.getElementById("prod_price_up").value) || null,
+            stock: parseInt(document.getElementById("prod_stock_up").value) || null,
+            category_id: parseInt(document.getElementById("prod_cat_up").value) || null,
+        };
+
+        const res = await fetch(`${API}/products/${id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        });
+        show(await res.json());
+    }
+
+    async function deleteProduct() {
+        const id = document.getElementById("prod_id_del").value;
+        const res = await fetch(`${API}/products/${id}`, {
+            method: "DELETE"
+        });
+        show({ status: res.status, message: "Eliminado" });
+    }
+</script>
+
+</body>
+</html>
+
