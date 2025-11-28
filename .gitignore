@@ -11,3 +11,5 @@ test_connection.py
 coverage.xml
 htmlcov/
 .coverage
+
+test_integration.db
