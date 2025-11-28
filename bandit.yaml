@@ -1,2 +1,3 @@
 skips:
   - B101
+# bandit -r app -c bandit.yaml
