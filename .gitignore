@@ -13,3 +13,5 @@ htmlcov/
 .coverage
 
 test_integration.db
+test_e2e.db
+test_e2e_flow.db
