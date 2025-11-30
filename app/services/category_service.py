@@ -11,7 +11,6 @@ class CategoryService:
         self.db = db
 
     def create(self, payload: CategoryCreate) -> Category:
-        # evitar duplicados por nombre
         existing = self.db.query(Category).filter(Category.name == payload.name).first()
         if existing:
             raise ConflictException(detail="Ya existe una categoría con ese nombre")
@@ -34,7 +33,6 @@ class CategoryService:
     def update(self, category_id: int, payload: CategoryUpdate) -> Category:
         category = self.get_or_404(category_id)
         if payload.name is not None:
-            # check uniqueness
             exists = (
                 self.db.query(Category)
                 .filter(Category.name == payload.name)
