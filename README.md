@@ -84,8 +84,9 @@ http://localhost:8000/products/
 Instrucciones para ejecutar la interfaz grafica(proyecto en la nube o local)
 
 (nube)
-1 Entra al siguiente enlace https://poryectop-production.up.railway.app
-2 Esto cargará la interfaz gráfica, donde se podrán probar todas las funcionalidades.
+1 Consultar con el dueño del proyecto para que levante el servicio en la nube
+2 Entra al siguiente enlace https://poryectop-production.up.railway.app
+3 Esto cargará la interfaz gráfica, donde se podrán probar todas las funcionalidades.
 
 O
 
