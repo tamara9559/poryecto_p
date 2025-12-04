@@ -68,10 +68,15 @@ Esto emula el funcionamiento real sin tocar la base de datos productiva en RDS.
 Instrucciones de cómo ejecutar el API(de manera local)
 
 1 Clonar repositorio
-2Instala las dependencias con: pip install -r requirements.txt
+
+2 Instala las dependencias con: pip install -r requirements.txt
+
 3 Crea el archivo .env y agrega las variables que te proporcionará el dueño del proyecto.
+
 4 Ejecuta el servidor con: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
 5 Abre en el navegador http://localhost:8000 para el frontend.
+
 6 Usa http://localhost:8000/docs para ver los endpoints interactivos.
 
 http://localhost:8000/docs con esta URL podrás entrar a la documentación interactiva
@@ -84,16 +89,23 @@ http://localhost:8000/products/
 Instrucciones para ejecutar la interfaz grafica(proyecto en la nube o local)
 
 (nube)
+
 1 Consultar con el dueño del proyecto para que levante el servicio en la nube
+
 2 Entra al siguiente enlace https://poryectop-production.up.railway.app
+
 3 Esto cargará la interfaz gráfica, donde se podrán probar todas las funcionalidades.
 
 O
 
 (local)
+
 1 Ejecuta el servicio backend
+
 2 Entra en el directorio donde se encuentra el archivo index.html desde el explorador de archivos.
+
 3 Ábrelo con el navegador de tu preferencia
+
 4 Esto cargará la interfaz gráfica automáticamente.
 
 Explicacion para ejecutar las pruebas
@@ -119,12 +131,19 @@ Si todas las etapas completan correctamente, el pipeline imprime "OK"
 Pasos para instalar las dependencias
 
 Para instalar las dependencias del proyecto,  
+
 1 asegúrate de tener Python 3.11 instalado que se puede descargar a través de su pagina web 
+
 2 abre una terminal en la carpeta raíz del proyecto 
+
 3 crea un entorno virtual con el comando python -m venv venv (para windows) source venv/bin/activate (linux\mac)
+
 4 para activar el entorno virtual venv\Scripts\activate (para windows) source venv/bin/activate (linux\mac)
+
 5 ejecuta pip install --upgrade pip para actualizar el gestor de paquetes  
+
 6 instala todas las librerías necesarias con pip install -r requirements.txt
+
 descargará automáticamente todas las dependencias listadas para que la API pueda ejecutarse correctamente.
 
 
